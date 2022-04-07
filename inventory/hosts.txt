@@ -1,0 +1,5 @@
+[app]
+ub16 ansible_host=192.168.4.113 
+
+[db]
+ub18 ansible_host=192.168.4.116 

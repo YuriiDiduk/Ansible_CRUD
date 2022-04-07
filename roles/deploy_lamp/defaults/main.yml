@@ -1,0 +1,4 @@
+---
+# defaults file for deploy_lamp
+dest_folder: /var/www/html/
+src_folder: /home/paragon/Documents/ansible/php-mysql-crud/

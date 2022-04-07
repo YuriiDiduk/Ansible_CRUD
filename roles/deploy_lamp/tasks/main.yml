@@ -1,0 +1,22 @@
+---
+# tasks file for deploy_lamp
+- name: Install LAMP Packages
+  apt: name={{ item }} update_cache=yes state=latest
+    loop: [ 'apache2', 'php', 'php-mysql', 'libapache2-mod-php' ]  
+- name: Copy dir
+  copy: src={{ src_folder }} dest={{ dest_folder }} 
+ #Apache Configuration
+     
+      
+- name: Configure db.php  
+    lineinfile:
+      path: {{ dest_folder }}db.php
+      regexp: "^\t'localhost',$"
+      line: "\t'192.168.4.111',"
+- name: Configure apache2
+    lineinfile:
+      path: /etc/apache2/mods-enabled/dir.conf
+      regexp: "^\tDirectoryIndex index.html index.cgi index.pl index.php index.xhtml index.htm$"
+      line: "\tDirectoryIndex index.php index.html index.cgi index.pl index.php index.xhtml index.htm"
+    notify: Restart Apache2
+

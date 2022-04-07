@@ -1,0 +1,48 @@
+---
+ - hosts: db
+   become: yes
+   
+
+   vars:
+     mysql_root_password: password123
+     dest_fold: /tmp/
+     src_fold: /home/paragon/Documents/ansible/php-mysql-crud/database/     
+   tasks:
+     #- name: install mysql
+     #  apt: name=mysql update_cache=yes cache_valid_time=3600 state=present
+       
+     - name:  install mysql
+       apt: name={{ item }} update_cache=yes state=latest
+       loop: [ 'mysql-server', 'mysql-client', 'python3-mysqldb', 'libmysqlclient-dev']
+
+     - name: start up the mysql   
+       shell: "service mysql start"
+     
+     - name: ensure mysql is enabled   
+       service: name=mysql state=started enabled=true
+       
+     - name: update mysql root password for all root accounts
+       mysql_user:
+         name: root  
+         host: "{{ item }}"
+         password: "{{ mysql_root_password }}"
+         login_user: root
+         login_password: "{{ mysql_root_password }}"
+         check_implicit_admin: yes  
+         priv: "*.*:ALL,GRANT"
+       with_items:
+       - "{{ ansible_hostname }}"
+       - 127.0.0.1 
+       - 192.168.4.113
+       - localhost
+       
+     - name: copy sql file
+       copy: src={{ src_fold }}script.sql dest={{ dest_fold }}script.sql
+        
+     - name: insert sample data into database  
+       mysql_db: name=all state=import target={{ dest_fold }}script.sql login_password="{{ mysql_root_password }}"
+       
+     - name: Configure ufw rules
+       ufw: rule=allow port=3306 proto=tcp 
+       
+
